@@ -1,6 +1,5 @@
 # Weather App
 This project consists of a weather application using Elixir, Cowboy Stream and the Open-Meteo and OpenStreetMap APIS.<br />
-Website Preview: LINK
 
 Used Technologies:
 - Elixir ([Install Here](https://elixir-lang.org/install.html))
