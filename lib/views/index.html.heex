@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather APP</title>
+
+    <link phx-track-static rel="stylesheet" href="/assets/index.css" />
+    <script defer phx-track-static type="text/javascript" src="/assets/index.js"></script>
+  </head>
+  <body class="lg:overflow-y-hidden overflow-x-hidden">
+    <header id="nav" class="px-10 py-5 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <h1 class="text-4xl" id="hour"><%= parse_time.(weather["current"]["time"]) %></h1>
+        <span class="text-xs"><%= weather["timezone_abbreviation"] %><br />TIME</span>
+      </div>
+
+      <form method="get" action="/" id="locate_search" class="relative hidden">
+        <svg class="absolute size-6 top-2 left-1.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="#6d7579">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+        </svg>
+
+        <input id="locate_input" type="text" placeholder="New York" class="w-80 h-10 rounded-xl text-[#6d7579] outline-0 pl-[2.2rem] font-bold border-[1px] border-[#e5e5e5]" required />
+      </form>
+
+      <div class="flex items-center gap-4">
+        <div id="locate" class="text-right block max-[560px]:hidden">
+          <h1 class="text-lg capitalize"><%= location %></h1>
+          <p class="text-sm"><%= weather["latitude"] %> <%= weather["longitude"] %></p>
+        </div>
+
+        <svg id="search" width="50" height="50" viewBox="0 0 49 59" fill="none" xmlns="http://www.w3.org/2000/svg" class="cursor-pointer">
+          <path d="M47 24C47 44.9499 24.5 57 24.5 57C24.5 57 2 44.9499 2 24C2 18.1652 4.37053 12.5695 8.5901 8.44365C12.8097 4.31785 18.5326 2 24.5 2C30.4674 2 36.1903 4.31785 40.4099 8.44365C44.6295 12.5695 47 18.1652 47 24Z" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M34 24C34 26.6522 32.9464 29.1957 31.0711 31.0711C29.1957 32.9464 26.6522 34 24 34C21.3478 34 18.8043 32.9464 16.9289 31.0711C15.0536 29.1957 14 26.6522 14 24C14 21.3478 15.0536 18.8043 16.9289 16.9289C18.8043 15.0536 21.3478 14 24 14C26.6522 14 29.1957 15.0536 31.0711 16.9289C32.9464 18.8043 34 21.3478 34 24Z" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </header>
+    <section class="px-32 py-5 max-md:px-10 max-lg:text-center">
+      <h1 class="text-8xl font-black max-md:text-5xl"><%= unless round(Enum.sum(weather["daily"]["precipitation_probability_max"]) / length(weather["daily"]["precipitation_probability_max"])) <= 50 do "Today will rain" else "Today will not rain" end %></h1>
+      <p class="max-w-[700px] opacity-75 mt-7 max-md:mt-2">
+        Today the sun will rise at <%= parse_time.(List.first(weather["daily"]["sunrise"])) %> and set at <%= parse_time.(List.first(weather["daily"]["sunset"])) %>. The sun's uv index is <%= List.first(weather["daily"]["uv_index_max"]) %>. Today there will be a <%= weather["current"]["snowfall"] %>% chance of snow, as well as a <%= weather["current"]["snow_depth"] %>m depth of snow. The wind speed is <%= weather["current"]["wind_speed_80m"] %>km/h.<br /><br />
+        By the way, this is a open-source project, you can get more information at my github: <a href="https://github.com/arthurbbarbosa" class="text-blue-300">@arthurbbarbosa</a>
+      </p>
+    </section>
+
+    <section class="lg:grid grid-cols-2">
+      <div class="flex flex-col gap-32 items-center px-10 py-10">
+        <div class="flex items-center flex-col gap-8 w-full">
+          <span class="font-black text-3xl">Weather Probability</span>
+          <div class="flex flex-row justify-between w-full bg-[#FFC222] h-2 rounded-full">
+            <div class="relative">
+              <div class="absolute -top-2.5 left-0 w-7 h-7 bg-[#FFC222] rounded-full"></div>
+              <span class="absolute top-6 left-0"><%= Enum.min(weather["daily"]["precipitation_probability_max"]) %>%</span>
+            </div>
+            <div class="relative">
+              <div class="absolute -top-2.5 w-7 h-7 bg-[#FFC222] rounded-full"></div>
+              <span class="absolute top-6 -left-0.5"><%= round(Enum.sum(weather["daily"]["precipitation_probability_max"]) / length(weather["daily"]["precipitation_probability_max"])) %>%</span>
+            </div>
+            <div class="relative">
+              <div class="absolute -top-2.5 right-0 w-7 h-7 bg-[#FFC222] rounded-full"></div>
+              <span class="absolute top-6 -right-1.5"><%= Enum.max(weather["daily"]["precipitation_probability_max"]) %>%</span>
+            </div>
+          </div>
+        </div>
+        <div class="flex items-center flex-col gap-8 w-full">
+          <span class="font-black text-3xl">Air Humidity</span>
+          <div class="flex flex-row justify-between w-full bg-[#FFC222] h-2 rounded-full">
+            <div class="relative">
+              <div class="absolute -top-2.5 left-0 w-7 h-7 bg-[#FFC222] rounded-full"></div>
+              <span class="absolute top-6 left-0"><%= Enum.min(weather["hourly"]["relative_humidity_2m"]) %>%</span>
+            </div>
+            <div class="relative">
+              <div class="absolute -top-2.5 w-7 h-7 bg-[#FFC222] rounded-full"></div>
+              <span class="absolute top-6 -left-0.5"><%= round(Enum.sum(weather["hourly"]["relative_humidity_2m"]) / length(weather["hourly"]["relative_humidity_2m"])) %>%</span>
+            </div>
+            <div class="relative">
+              <div class="absolute -top-2.5 right-0 w-7 h-7 bg-[#FFC222] rounded-full"></div>
+              <span class="absolute top-6 -right-1.5"><%= Enum.max(weather["hourly"]["relative_humidity_2m"]) %>%</span>
+            </div>
+          </div>
+        </div>
+        <div class="flex items-center flex-col gap-8 w-full">
+          <span class="font-black text-3xl">Temperature</span>
+          <div class="flex flex-row justify-between w-full bg-[#FFC222] h-2 rounded-full">
+            <div class="relative">
+              <div class="absolute -top-2.5 left-0 w-7 h-7 bg-[#FFC222] rounded-full"></div>
+              <span class="absolute top-6 left-0"><%= Enum.min(weather["daily"]["temperature_2m_min"]) %>°C</span>
+            </div>
+            <div class="relative">
+              <div class="absolute -top-2.5 w-7 h-7 bg-[#FFC222] rounded-full"></div>
+              <span class="absolute top-6 -left-0.5"><%= round(Enum.sum(weather["daily"]["temperature_2m_max"]) / length(weather["daily"]["temperature_2m_max"])) %>°C</span>
+            </div>
+            <div class="relative">
+              <div class="absolute -top-2.5 right-0 w-7 h-7 bg-[#FFC222] rounded-full"></div>
+              <span class="absolute top-6 -right-1.5"><%= Enum.max(weather["daily"]["temperature_2m_max"]) %>°C</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="relative max-lg:hidden">
+        <div class="absolute w-[46.875rem] h-[46.875rem] lg:mt-32 lg:ml-44 bg-[#FFC222] opacity-80 rounded-full" />
+        <div class="absolute w-[50rem] h-[50rem] lg:mt-32 ml-44 -left-52 -top-40 border-8 border-[#C92628] bg-transparent opacity-80 rounded-full" />
+      </div>
+    </section>
+  </body>
+</html>
